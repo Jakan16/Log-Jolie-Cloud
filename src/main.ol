@@ -32,6 +32,6 @@ main
       throw( InvalidType, { .info = "Type: " + trimmed_type + " is not a valid type." } )
     }
 
-    out = true
+    out.success = true
   }
 }
