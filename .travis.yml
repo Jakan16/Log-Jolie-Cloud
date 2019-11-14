@@ -10,8 +10,8 @@ install:
 
 before_script:
   - jolie src/main.ol &
-  - jolie test/test.ol &
-  - sleep 3 # wait for everything to be ready
+  - jolie test/adapter.ol &
+  - sleep 3 # wait for everything to get ready
 
 script:
-  - node_modules/.bin/newman run "https://api.getpostman.com/collections/$collection_uid?apikey=$api-key"
+  - node_modules/.bin/newman run "https://api.getpostman.com/collections/$collection_uid?apikey=$apiKey"
