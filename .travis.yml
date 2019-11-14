@@ -1,0 +1,17 @@
+language: java
+
+install:
+  # install jolie
+  - wget -O jolie.jar https://www.jolie-lang.org/files/releases/jolie-1.8.2.jar
+  - (printf "\n\n"; sleep 10) | sudo java -jar jolie.jar
+  - echo 'export JOLIE_HOME="/usr/lib/jolie"' >> ~/.bash_profile
+  - export JOLIE_HOME="/usr/lib/jolie"
+  - npm install newman
+
+before_script:
+  - jolie src/main.ol &
+  - jolie test/test.ol &
+  - sleep 3 # wait for everything to be ready
+
+script:
+  - node_modules/.bin/newman run "https://api.getpostman.com/collections/$collection_uid?apikey=$api-key"
