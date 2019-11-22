@@ -8,28 +8,34 @@ inputPort in {
   Interfaces: SubmitCodeInterface
 }
 
+inputPort embedSocket {
+  Location: "local"
+  Protocol: sodep
+  Interfaces: SubmitCodeInterface
+}
+
 execution{ concurrent }
 
 main
 {
   submitCode( in )( out ){
-    trim@StringUtils( in.name )( trimmed_name )
-    if( trimmed_name == "" ) {
+    trim@StringUtils( in.name )( in.name )
+    if( in.name == "" ) {
       throw( NoName, { .info = "Name cannot be empty" } )
     }
 
-    trim@StringUtils( in.code )( trimmed_code )
-    if( trimmed_code == "" ) {
+    trim@StringUtils( in.code )( in.code )
+    if( in.code == "" ) {
       throw( InvalidCode, { .info = "Code cannot be empty" } )
     }
 
-    trim@StringUtils( in.type )( trimmed_type )
-    if( trimmed_type == "" ) {
+    trim@StringUtils( in.type )( in.type )
+    if( in.type == "" ) {
       throw( InvalidType, { .info = "Type cannot be empty" } )
     }
 
-    if( trimmed_type != "jolie" ) {
-      throw( InvalidType, { .info = "Type: " + trimmed_type + " is not a valid type." } )
+    if( in.type != "jolie" ) {
+      throw( InvalidType, { .info = "Type: " + in.type + " is not a valid type." } )
     }
 
     out.success = true

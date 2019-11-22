@@ -19,7 +19,7 @@ interface SubmitCodeInterface {
     submitCode( SubmitCodeRequest ) ( SubmitCodeResponse )
       throws
         NoName( errorMsg )
-        InvalidAuthorization( errorMsg )
+        UnAuthorized( errorMsg )
         InvalidType( errorMsg )
         InvalidCode( errorMsg )
   OneWay:
