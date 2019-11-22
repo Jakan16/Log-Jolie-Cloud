@@ -3,12 +3,8 @@ type errorMsg: void {
 }
 
 type UserInfo: void {
-  agent: void {
-    id: string
-  }
-  owner: void {
-    id: string
-  }
+  name: string
+  id: string
 }
 
 interface AuthInterface {
