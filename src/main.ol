@@ -1,5 +1,7 @@
 include "console.iol"
 include "string_utils.iol"
+
+include "auth/auth.iol"
 include "../interfaces/submit_code_interface.iol"
 
 inputPort in {
@@ -19,6 +21,9 @@ execution{ concurrent }
 main
 {
   submitCode( in )( out ){
+
+    authenticate@Auth( in.authorization )( user )
+
     trim@StringUtils( in.name )( in.name )
     if( in.name == "" ) {
       throw( NoName, { .info = "Name cannot be empty" } )
