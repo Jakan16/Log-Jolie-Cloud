@@ -10,13 +10,24 @@ execution{ concurrent }
 
 main
 {
-  authenticate( token )( res ){
-    //mock
-    if( token == "valid_token" ) {
-      res.id = "sdighsodgs"
-      res.name = "The cool company"
-    }else{
-      throw( UnAuthorized, { .info = "Token could not be authorized" } )
+  authenticate( token )( global.cached.( token ).user ){
+    synchronized( authSync ){
+      with( global.cached.( token ) ){
+        if( !.defined ) {
+          //mock
+          .defined = true
+          if( token == "valid_token" ) {
+            .user.id = "sdighsodgs"
+            .user.name = "The cool company"
+            .invalid = false
+          }else{
+            .invalid = true
+            throw( UnAuthorized, { .info = "Token could not be authorized" } )
+          }
+        }else if ( .invalid ) {
+          throw( UnAuthorized, { .info = "Token cached as invalid" } )
+        }
+      }
     }
   }
 }

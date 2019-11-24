@@ -15,8 +15,3 @@ interface AuthInterface {
 outputPort Auth {
   Interfaces: AuthInterface
 }
-
-embedded {
-  Jolie:
-    "auth/auth.ol" in Auth
-}

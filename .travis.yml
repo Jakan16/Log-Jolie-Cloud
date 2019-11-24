@@ -18,3 +18,4 @@ before_script:
 
 script:
   - docker exec unitTestSuite jolie test/submitcode_test.ol
+  - docker exec unitTestSuite jolie test/auth_test.ol

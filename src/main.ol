@@ -26,6 +26,11 @@ init
   connect@Database()()
 }
 
+embedded {
+  Jolie:
+    "auth/auth.ol" in Auth
+}
+
 main
 {
   submitCode( in )( out ){
