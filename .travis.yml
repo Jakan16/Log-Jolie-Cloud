@@ -2,14 +2,15 @@ language: java
 
 services:
   - docker
+  - mongodb
 
 before_install:
-  - docker run --rm --entrypoint cat jolielang/jolie /usr/lib/jolie/jolie.jar > /jolie/jolie.jar
-  - mvn install:install-file -Dfile=/jolie/jolie.jar -DgroupId=jolie -DartifactId=jolie -Dversion=1.8.2 -Dpackaging=jar
+  - docker run -v ${PWD}:/opt/mount --rm --entrypoint cp jolielang/jolie /usr/lib/jolie/jolie.jar /opt/mount/jolie.jar
+  - mvn install:install-file -Dfile=jolie.jar -DgroupId=jolie -DartifactId=jolie -Dversion=1.8.2 -Dpackaging=jar
 
 
 install:
-  - cd /java/mongo4jolie && mvn package
+  - (cd java/mongo4jolie && mvn package)
   - docker build -t cloud/test . -f Dockerfile.test
   - docker run -d -t --name unitTestSuite cloud/test
 
