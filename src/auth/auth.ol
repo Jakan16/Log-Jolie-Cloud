@@ -1,4 +1,5 @@
 include "auth.iol"
+include "time.iol"
 
 inputPort embedSocket {
   Location: "local"
@@ -13,9 +14,11 @@ main
   authenticate( token )( global.cached.( token ).user ){
     synchronized( authSync ){
       with( global.cached.( token ) ){
-        if( !.defined ) {
+        getCurrentTimeMillis@Time( )( currentTime )
+        if( !.defined || currentTime - .atTime > 30*60*1000) {
           //mock
           .defined = true
+          getCurrentTimeMillis@Time( )( .atTime )
           if( token == "valid_token" ) {
             .user.id = "sdighsodgs"
             .user.name = "The cool company"
