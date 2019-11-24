@@ -1,7 +1,7 @@
 include "console.iol"
 include "runtime.iol"
 
-include "../interfaces/submit_code_interface.iol"
+include "../src/submit_code_interface.iol"
 
 outputPort Cloud {
   Interfaces: SubmitCodeInterface
@@ -22,9 +22,9 @@ main
     install( NoName => nullProcess )
 
     with(req){
-      .name = " "
-      .code = "some code"
-      .type = "jolie"
+      .parser.name = " "
+      .parser.code = "some code"
+      .parser.type = "jolie"
       .authorization = "valid_token"
     }
 
@@ -40,9 +40,9 @@ main
     install( InvalidCode => nullProcess )
 
     with(req){
-      .name = "my awesome code"
-      .code = " \n"
-      .type = "jolie"
+      .parser.name = "my awesome code"
+      .parser.code = " \n"
+      .parser.type = "jolie"
       .authorization = "valid_token"
     }
 
@@ -58,9 +58,9 @@ main
     install( InvalidType => nullProcess )
 
     with(req){
-      .name = "my awesome code"
-      .code = "some code"
-      .type = ""
+      .parser.name = "my awesome code"
+      .parser.code = "some code"
+      .parser.type = ""
       .authorization = "valid_token"
     }
 
@@ -76,9 +76,9 @@ main
     install( InvalidType => nullProcess )
 
     with(req){
-      .name = "my awesome code"
-      .code = "some code"
-      .type = "ThisTypeDoesNotExist!"
+      .parser.name = "my awesome code"
+      .parser.code = "some code"
+      .parser.type = "ThisTypeDoesNotExist!"
       .authorization = "valid_token"
     }
 
@@ -93,9 +93,9 @@ main
   {
     install( UnAuthorized => nullProcess )
     with(req){
-      .name = "my awesome code"
-      .code = "some code"
-      .type = "jolie"
+      .parser.name = "my awesome code"
+      .parser.code = "some code"
+      .parser.type = "jolie"
       .authorization = "invalid_token"
     }
 
@@ -109,9 +109,9 @@ main
   scope( IdealCase )
   {
     with(req){
-      .name = "my awesome code"
-      .code = "some code"
-      .type = "jolie"
+      .parser.name = "my awesome code"
+      .parser.code = "some code"
+      .parser.type = "jolie"
       .authorization = "valid_token"
     }
 

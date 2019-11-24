@@ -1,8 +1,11 @@
 include "console.iol"
 include "string_utils.iol"
+include "json_utils.iol"
+include "time.iol"
 
 include "auth/auth.iol"
-include "../interfaces/submit_code_interface.iol"
+include "database/database.iol"
+include "submit_code_interface.iol"
 
 inputPort in {
   Location: "socket://localhost:8000"
@@ -18,31 +21,47 @@ inputPort embedSocket {
 
 execution{ concurrent }
 
+init
+{
+  connect@Database()()
+}
+
 main
 {
   submitCode( in )( out ){
+    {
+      authenticate@Auth( in.authorization )( user )
+    }
+    |
+    {
+      trim@StringUtils( in.parser.name )( in.parser.name )
+      if( in.parser.name == "" ) {
+        throw( NoName, { .info = "Name cannot be empty" } )
+      }
 
-    authenticate@Auth( in.authorization )( user )
+      trim@StringUtils( in.parser.code )( in.parser.code )
+      if( in.parser.code == "" ) {
+        throw( InvalidCode, { .info = "Code cannot be empty" } )
+      }
 
-    trim@StringUtils( in.name )( in.name )
-    if( in.name == "" ) {
-      throw( NoName, { .info = "Name cannot be empty" } )
+      trim@StringUtils( in.parser.type )( in.parser.type )
+      if( in.parser.type == "" ) {
+        throw( InvalidType, { .info = "Type cannot be empty" } )
+      }
+
+      if( in.parser.type != "jolie" ) {
+        throw( InvalidType, { .info = "Type: " + in.parser.type + " is not a valid type." } )
+      }
+
+      getJsonString@JsonUtils( in.parser )( jsonDoc )
     }
 
-    trim@StringUtils( in.code )( in.code )
-    if( in.code == "" ) {
-      throw( InvalidCode, { .info = "Code cannot be empty" } )
+    with( document ){
+      .database = "parsers";
+      .collection = user.id;
+      .document = jsonDoc
     }
 
-    trim@StringUtils( in.type )( in.type )
-    if( in.type == "" ) {
-      throw( InvalidType, { .info = "Type cannot be empty" } )
-    }
-
-    if( in.type != "jolie" ) {
-      throw( InvalidType, { .info = "Type: " + in.type + " is not a valid type." } )
-    }
-
-    out.success = true
+    insert@Database( document )( out.success )
   }
 }

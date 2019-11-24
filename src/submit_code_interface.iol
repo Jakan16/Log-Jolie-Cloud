@@ -3,9 +3,11 @@ type errorMsg: void {
 }
 
 type SubmitCodeRequest: void {
-  name: string
-  code: string
-  type: string
+  parser: void {
+    name: string
+    code: string
+    type: string
+  }
   authorization: string
 }
 

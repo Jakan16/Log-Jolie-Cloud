@@ -1,5 +1,5 @@
 FROM jolielang/jolie
 EXPOSE 8000
 COPY src src
-COPY interfaces interfaces
+COPY lib lib
 COPY test test

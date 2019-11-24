@@ -4,11 +4,14 @@ services:
   - docker
 
 before_install:
-  - docker build -t cloud/test . -f Dockerfile.test
-  - docker run -d -t --name unitTestSuite cloud/test
+  - docker run --rm --entrypoint cat jolielang/jolie /usr/lib/jolie/jolie.jar > /jolie/jolie.jar
+  - mvn install:install-file -Dfile=/jolie/jolie.jar -DgroupId=jolie -DartifactId=jolie -Dversion=1.8.2 -Dpackaging=jar
+
 
 install:
-  - skip
+  - cd /java/mongo4jolie && mvn package
+  - docker build -t cloud/test . -f Dockerfile.test
+  - docker run -d -t --name unitTestSuite cloud/test
 
 script:
   - docker exec unitTestSuite jolie test/submitcode_test.ol
