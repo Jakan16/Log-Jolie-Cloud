@@ -16,6 +16,9 @@ main
 {
   error = 0
 
+  install( TypeMismatch => halt@Runtime( {status = 2} )( ) )
+  install( Timeout => halt@Runtime( {status = 3} )( ) )
+
   /////////////////////////////////////////////////////////////////////
   scope( NoNameTest )
   {

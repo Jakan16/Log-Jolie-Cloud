@@ -8,11 +8,13 @@ before_install:
   - docker run -v ${PWD}:/opt/mount --rm --entrypoint cp jolielang/jolie /usr/lib/jolie/jolie.jar /opt/mount/jolie.jar
   - mvn install:install-file -Dfile=jolie.jar -DgroupId=jolie -DartifactId=jolie -Dversion=1.8.2 -Dpackaging=jar
 
-
 install:
   - (cd java/mongo4jolie && mvn package)
   - docker build -t cloud/test . -f Dockerfile.test
   - docker run -d -t --name unitTestSuite cloud/test
+
+before_script:
+  - sleep 15 # wait for mongodb
 
 script:
   - docker exec unitTestSuite jolie test/submitcode_test.ol
