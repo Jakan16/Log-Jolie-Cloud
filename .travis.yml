@@ -10,7 +10,7 @@ before_install:
 
 install:
   - (cd parserManager/java/mongo4jolie && mvn package)
-  - docker build -t cloud/test . -f parserManager/Dockerfile.test
+  - docker build -t cloud/test parserManager -f parserManager/Dockerfile.test
   - docker run -d -t --network="host" --name unitTestSuite cloud/test
 
 before_script:
