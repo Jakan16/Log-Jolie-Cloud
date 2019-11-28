@@ -2,11 +2,11 @@
 type logParseRequest: void {
   agent: string
   timestamp: long
-  log: any
+  log: undefined
 }
 
 type logParseResponse: void {
-  content: any
+  content: undefined
   logtype: string
   tag?: string
 }
