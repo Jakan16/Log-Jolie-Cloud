@@ -1,4 +1,3 @@
-
 type logParseRequest: void {
   agent: string
   timestamp: long
@@ -11,8 +10,7 @@ type logParseResponse: void {
   tag?: string
 }
 
-
-interface LogParseInterface {
+interface LogParserInterface {
   RequestResponse:
     parseLog( logParseRequest )( logParseResponse )
   OneWay:

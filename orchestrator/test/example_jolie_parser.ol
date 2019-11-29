@@ -1,13 +1,10 @@
-include "../interfaces/log_parser_interface.iol"
-include "string_utils.iol"
+include "parser.iol"
 
 inputPort Parser {
-  Location: "socket://localhost:32799"
+  Location: "socket://localhost:27521"
   Protocol: sodep
-  Interfaces: LogParseInterface
+  Interfaces: LogParserInterface
 }
-
-execution{ concurrent }
 
 main
 {
