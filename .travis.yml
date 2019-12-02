@@ -2,7 +2,6 @@ language: java
 
 services:
   - docker
-  - mongodb
 
 before_install:
   - docker run -v ${PWD}:/opt/mount --rm --entrypoint cp jolielang/jolie /usr/lib/jolie/jolie.jar /opt/mount/jolie.jar
@@ -10,12 +9,13 @@ before_install:
 
 install:
   - (cd parserManager/java/mongo4jolie && mvn package)
-  - docker build -t cloud/test parserManager -f parserManager/Dockerfile.test
-  - docker run -d -t --network="host" --name unitTestSuite cloud/test
+  - docker-compose build
 
 before_script:
-  - sleep 5 # wait for mongodb
+  - docker-compose up
+  - sleep 5 # wait for services to get ready
 
 script:
-  - docker exec unitTestSuite jolie test/submitcode_test.ol
-  - docker exec unitTestSuite jolie test/auth_test.ol
+  - docker exec parsermanager_1 jolie test/submitcode_test.ol
+  - docker exec parsermanager_1 jolie test/auth_test.ol
+  - docker exec builder_1 jolie test/build_container_test.ol

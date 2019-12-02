@@ -1,15 +1,11 @@
 type BuildRequest: void {
+  name: string
   code: string
   type: string
-  name: string
-}
-
-type BuildResponse: void {
-  success: bool
 }
 
 interface BuildService {
   RequestResponse:
-    build( BuildRequest )( BuildResponse )
   OneWay:
+    build( BuildRequest )
 }

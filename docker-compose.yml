@@ -1,0 +1,17 @@
+version: "3"
+services:
+  parsermanager:
+    build: ./parserManager
+    image: parsermanager:test
+    ports:
+      - "8001:8001"
+  builder:
+    build: ./builder
+    image: builder:test
+    environment:
+    - AWS_ACCESS_KEY_ID=AKIAYTQAH5WGYHTHZT2P
+    - AWS_SECRET_ACCESS_KEY=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
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+  mongo_db:
+    image: mongo

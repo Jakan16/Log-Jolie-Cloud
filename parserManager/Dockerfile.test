@@ -1,5 +1,0 @@
-FROM jolielang/jolie
-EXPOSE 8000
-COPY src src
-COPY lib lib
-COPY test test

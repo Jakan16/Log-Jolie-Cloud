@@ -1,5 +1,3 @@
-type ConnectionInfo: void
-
 type Document: void {
   database: string
   collection: string
@@ -26,7 +24,7 @@ type DeleteAction: void {
 
 interface DocumentInterface {
   RequestResponse:
-    connect( ConnectionInfo )( bool ),
+    connect( string )( bool ),
     insert( Document )( bool ),
     find( Page )( PageResponse ),
     delete( DeleteAction )( bool )

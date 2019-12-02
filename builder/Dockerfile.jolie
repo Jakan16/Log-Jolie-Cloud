@@ -1,4 +1,5 @@
 FROM jolielang/jolie
 EXPOSE 27521
+COPY src/parser.iol parser.iol
 COPY parsercode.temp parser.ol
 CMD jolie parser.ol

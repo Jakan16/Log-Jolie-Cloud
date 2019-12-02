@@ -15,7 +15,11 @@ public class MongoDBService extends JavaService {
     private MongoClient client;
 
     public Value connect( Value connectionInfo ) {
-        client = MongoClients.create();
+        if (connectionInfo.strValue().equals("")){
+            client = MongoClients.create();
+        }else{
+            client = MongoClients.create( connectionInfo.strValue() );
+        }
         return Value.create(true);
     }
 
@@ -55,7 +59,7 @@ public class MongoDBService extends JavaService {
         MongoCursor<Document> cursor = collection
                 .find()
                 .skip( request.firstChildOrDefault("offset", Value::intValue, v -> 0) )
-                .limit( request.firstChildOrDefault("limit", Value::intValue, v -> 100) )
+                .limit( request.getFirstChild( "limit" ).intValue() )
                 .iterator();
 
         Value response = Value.create();

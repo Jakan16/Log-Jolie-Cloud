@@ -23,6 +23,8 @@ type RetrieveCodeRequest: void {
 
 type RetrieveCodeResponse: void {
   count: int
+  offset: int
+  limit: int
   parsers: undefined
 }
 

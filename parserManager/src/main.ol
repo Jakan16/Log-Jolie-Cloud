@@ -5,7 +5,13 @@ include "time.iol"
 
 include "auth/auth.iol"
 include "database/database.iol"
+include "builder.iol"
 include "submit_code_interface.iol"
+
+embedded {
+  Jolie:
+    "auth/auth.ol" in Auth,
+}
 
 inputPort http {
   Location: "socket://localhost:8001"
@@ -29,12 +35,7 @@ execution{ concurrent }
 
 init
 {
-  connect@Database()()
-}
-
-embedded {
-  Jolie:
-    "auth/auth.ol" in Auth
+  connect@Database( "mongodb://mongo_db" )()
 }
 
 main
@@ -61,7 +62,10 @@ main
         throw( InvalidType, { .info = "Type: " + in.parser.type + " is not a valid type." } )
       }
     }
+
+    in.parser.status = "submitted";
     getJsonString@JsonUtils( in.parser )( jsonDoc );
+    undef( in.parser.status )
 
     with( insertReq ){
       .database = "parsers";
@@ -69,8 +73,12 @@ main
       .document = jsonDoc
     }
 
-    insert@Database( insertReq )( out.success )
-  }]
+    insert@Database( insertReq )( insertResult )
+
+    out.success = insertResult
+  }]{
+    build@Builder( in.parser )
+  }
 
   [retrieveCode( in )( out ){
     authenticate@Auth( in.authorization )( user );
@@ -80,16 +88,22 @@ main
       .collection = user.id;
       if( in.offset != void ) {
         .offset = in.offset
+      }else{
+        .offset = 0
       }
 
       if( in.limit != void ) {
         .limit = in.limit
+      }else{
+        .limit = 100
       }
     }
 
     find@Database( pageReq )( pageDetails );
 
     out.count = pageDetails.count;
+    out.offset = pageReq.offset
+    out.limit = pageReq.limit
     getJsonValue@JsonUtils( pageDetails.documents )( out.parsers )
   }]
 

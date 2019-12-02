@@ -1,11 +1,5 @@
 include "parser.iol"
 
-inputPort Parser {
-  Location: "socket://localhost:27521"
-  Protocol: sodep
-  Interfaces: LogParserInterface
-}
-
 main
 {
   parseLog( request ) ( response ){
