@@ -1,11 +1,11 @@
 include "console.iol"
 include "runtime.iol"
 
-include "../src/auth/auth.iol"
+include "../../lib/auth/auth.iol"
 
 embedded {
   Jolie:
-    "../src/auth/auth.ol" in Auth
+    "../../lib/auth/auth.ol" in Auth
 }
 
 main
