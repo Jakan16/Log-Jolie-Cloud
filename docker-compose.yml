@@ -9,8 +9,8 @@ services:
     build: ./builder
     image: builder:test
     environment:
-    - AWS_ACCESS_KEY_ID=AKIAYTQAH5WGYHTHZT2P
-    - AWS_SECRET_ACCESS_KEY=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
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   mongo_db:

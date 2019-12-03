@@ -16,6 +16,6 @@ before_script:
   - sleep 5 # wait for services to get ready
 
 script:
-  - docker exec parsermanager_1 jolie test/submitcode_test.ol
-  - docker exec parsermanager_1 jolie test/auth_test.ol
-  - docker exec builder_1 jolie test/build_container_test.ol
+  - docker exec log-jolie-cloud_parsermanager_1 jolie test/submitcode_test.ol
+  - docker exec log-jolie-cloud_parsermanager_1 jolie test/auth_test.ol
+  - docker exec log-jolie-cloud_builder_1 jolie test/build_container_test.ol
