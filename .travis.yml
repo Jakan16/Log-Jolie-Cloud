@@ -17,6 +17,6 @@ before_script:
   - docker container ls
 
 script:
-  - docker exec log-jolie-cloud_parsermanager_1 jolie test/submitcode_test.ol
-  - docker exec log-jolie-cloud_parsermanager_1 jolie test/auth_test.ol
-  - docker exec log-jolie-cloud_builder_1 jolie test/build_container_test.ol
+  - docker exec parsermanager jolie test/submitcode_test.ol
+  - docker exec parsermanager jolie test/auth_test.ol
+  - docker exec builder jolie test/build_container_test.ol
