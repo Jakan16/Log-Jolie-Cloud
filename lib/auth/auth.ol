@@ -1,4 +1,4 @@
-include "auth.iol"
+include "auth_interface.iol"
 include "time.iol"
 
 inputPort embedSocket {

@@ -1,7 +1,6 @@
 FROM jolielang/jolie
 EXPOSE 8001
-WORKDIR /parsermanager
-COPY src src
+WORKDIR /root
+COPY parserManager parserManager
 COPY lib lib
-COPY test test
-CMD jolie src/main.ol
+CMD jolie parserManager/src/main.ol

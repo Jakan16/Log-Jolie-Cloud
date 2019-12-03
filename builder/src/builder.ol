@@ -34,7 +34,7 @@ main
   replaceAll@StringUtils( tag )( tag )
 
   if( info.type == "jolie" ) {
-    command = "docker build -f Dockerfile.jolie -t parsers:" + tag + " ."
+    command = "docker build -f builder/Dockerfile.jolie -t parsers:" + tag + " ."
     exec
     command = "docker tag parsers:" + tag + " 591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers:" + tag
     exec

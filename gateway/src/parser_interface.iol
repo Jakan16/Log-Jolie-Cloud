@@ -17,9 +17,3 @@ interface LogParserInterface {
     parseLog( logParseRequest )( logParseResponse )
   OneWay:
 }
-
-inputPort Parser {
-  Location: "socket://localhost:27521"
-  Protocol: sodep
-  Interfaces: LogParserInterface
-}

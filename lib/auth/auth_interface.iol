@@ -5,6 +5,7 @@ type errorMsg: void {
 type UserInfo: void {
   name: string
   id: string
+  agent?: string
 }
 
 interface AuthInterface {

@@ -12,8 +12,7 @@ RUN apk -v --update add \
     pip install --upgrade awscli s3cmd==2.0.1 python-magic && \
     apk -v --purge del py-pip && \
     rm /var/cache/apk/*
-WORKDIR /builder
-COPY src src
-COPY test test
-ADD Dockerfile.jolie .
-CMD $(aws ecr get-login --no-include-email --region eu-central-1) && jolie src/builder.ol
+WORKDIR /root
+COPY builder builder
+COPY lib lib
+CMD $(aws ecr get-login --no-include-email --region eu-central-1) && jolie builder/src/builder.ol

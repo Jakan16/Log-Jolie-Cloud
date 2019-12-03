@@ -1,13 +1,17 @@
 version: "3"
 services:
   parsermanager:
-    build: ./parserManager
+    build:
+      context: .
+      dockerfile: ./parserManager/Dockerfile
     image: parsermanager:test
     ports:
       - "8001:8001"
     container_name: parsermanager
   builder:
-    build: ./builder
+    build:
+      context: .
+      dockerfile: ./builder/Dockerfile
     image: builder:test
     environment:
     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}

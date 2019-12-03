@@ -3,14 +3,14 @@ include "string_utils.iol"
 include "json_utils.iol"
 include "time.iol"
 
-include "auth/auth.iol"
-include "database/database.iol"
+include "../../lib/auth/auth.iol"
+include "../../lib/database/database.iol"
 include "builder.iol"
 include "submit_code_interface.iol"
 
 embedded {
   Jolie:
-    "auth/auth.ol" in Auth,
+    "../../lib/auth/auth.ol" in Auth,
 }
 
 inputPort http {
@@ -36,7 +36,6 @@ main
 {
   [submitCode( in )( out ){
     {
-      println@Console( "hej" )()
       authenticate@Auth( in.authorization )( user ) |
       trim@StringUtils( in.parser.name )( in.parser.name );
       if( in.parser.name == "" ) {
@@ -58,8 +57,6 @@ main
       }
     }
 
-    println@Console( "med" )()
-
     in.parser.status = "submitted";
     getJsonString@JsonUtils( in.parser )( jsonDoc );
     undef( in.parser.status )
@@ -70,10 +67,7 @@ main
       .document = jsonDoc
     }
 
-    println@Console( "dig" )()
-
     insert@Database( insertReq )( out.success )
-    println@Console( out.success )()
   }]{
     build@Builder( in.parser )
   }
