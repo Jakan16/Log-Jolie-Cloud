@@ -19,6 +19,12 @@ inputPort http {
   Interfaces: SubmitCodeInterface
 }
 
+inputPort sodep {
+  Location: "socket://localhost:8000"
+  Protocol: sodep
+  Interfaces: SubmitCodeInterface
+}
+
 execution{ concurrent }
 
 init
@@ -30,6 +36,7 @@ main
 {
   [submitCode( in )( out ){
     {
+      println@Console( "hej" )()
       authenticate@Auth( in.authorization )( user ) |
       trim@StringUtils( in.parser.name )( in.parser.name );
       if( in.parser.name == "" ) {
@@ -51,6 +58,8 @@ main
       }
     }
 
+    println@Console( "med" )()
+
     in.parser.status = "submitted";
     getJsonString@JsonUtils( in.parser )( jsonDoc );
     undef( in.parser.status )
@@ -61,9 +70,10 @@ main
       .document = jsonDoc
     }
 
-    insert@Database( insertReq )( insertResult )
+    println@Console( "dig" )()
 
-    out.success = insertResult
+    insert@Database( insertReq )( out.success )
+    println@Console( out.success )()
   }]{
     build@Builder( in.parser )
   }

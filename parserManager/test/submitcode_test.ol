@@ -5,19 +5,20 @@ include "json_utils.iol"
 include "../src/submit_code_interface.iol"
 
 outputPort Cloud {
-  Location: "socket://localhost:8001"
+  Location: "socket://localhost:8000"
   Interfaces: SubmitCodeInterface
-  Protocol: http
+  Protocol: sodep
 }
 
 main
 {
   error = 0
 
-  install( TypeMismatch => halt@Runtime( {status = 2} )( ) )
-  install( Timeout => halt@Runtime( {status = 3} )( ) )
+  //install( TypeMismatch => halt@Runtime( {status = 2} )( ) )
+  //install( Timeout => halt@Runtime( {status = 3} )( ) )
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "NoNameTest" )()
   scope( NoNameTest )
   {
     install( NoName => nullProcess )
@@ -36,6 +37,7 @@ main
   }
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "NoCodeTest" )()
   scope( NoCodeTest )
   {
     install( InvalidCode => nullProcess )
@@ -54,6 +56,7 @@ main
   }
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "NoTypeTest" )()
   scope( NoTypeTest )
   {
     install( InvalidType => nullProcess )
@@ -72,6 +75,7 @@ main
   }
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "InvalidTypeTest" )()
   scope( InvalidTypeTest )
   {
     install( InvalidType => nullProcess )
@@ -90,6 +94,7 @@ main
   }
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "UnAuthorizationTest" )()
   scope( UnAuthorizationTest )
   {
     install( UnAuthorized => nullProcess )
@@ -107,6 +112,7 @@ main
   }
 
   /////////////////////////////////////////////////////////////////////
+  println@Console( "SubmitCode" )()
   scope( SubmitCode )
   {
     with( req ){
@@ -153,6 +159,7 @@ main
   }
 
 //////////////////////////////////////////////////////////////////////
+println@Console( "CheckNumOfEntries" )()
 scope( CheckNumOfEntries )
 {
   with( rreq ){
@@ -173,6 +180,7 @@ scope( CheckNumOfEntries )
 }
 
 //////////////////////////////////////////////////////////////////////
+println@Console( "DeleteEntries" )()
 scope( DeleteEntries )
 {
 

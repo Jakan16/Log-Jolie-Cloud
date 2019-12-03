@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Mongo4Jolie" />
         <module name="mongo4jolie" />
+        <module name="Mongo4Jolie" />
       </profile>
     </annotationProcessing>
   </component>
