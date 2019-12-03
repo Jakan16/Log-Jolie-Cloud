@@ -12,8 +12,9 @@ install:
   - docker-compose build
 
 before_script:
-  - docker-compose up
+  - docker-compose up -d
   - sleep 5 # wait for services to get ready
+  - docker container ls
 
 script:
   - docker exec log-jolie-cloud_parsermanager_1 jolie test/submitcode_test.ol

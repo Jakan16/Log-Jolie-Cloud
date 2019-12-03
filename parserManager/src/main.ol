@@ -19,18 +19,6 @@ inputPort http {
   Interfaces: SubmitCodeInterface
 }
 
-inputPort in {
-  Location: "socket://localhost:8000"
-  Protocol: sodep
-  Interfaces: SubmitCodeInterface
-}
-
-inputPort embedSocket {
-  Location: "local"
-  Protocol: sodep
-  Interfaces: SubmitCodeInterface
-}
-
 execution{ concurrent }
 
 init

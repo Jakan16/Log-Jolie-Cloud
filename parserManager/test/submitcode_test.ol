@@ -5,12 +5,9 @@ include "json_utils.iol"
 include "../src/submit_code_interface.iol"
 
 outputPort Cloud {
+  Location: "socket://localhost:8001"
   Interfaces: SubmitCodeInterface
-}
-
-embedded {
-  Jolie:
-    "../src/main.ol" in Cloud
+  Protocol: http
 }
 
 main
