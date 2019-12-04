@@ -2,6 +2,7 @@ include "console.iol"
 include "string_utils.iol"
 include "json_utils.iol"
 include "time.iol"
+include "runtime.iol"
 
 include "../../lib/auth/auth.iol"
 include "../../lib/database/database.iol"
@@ -41,7 +42,13 @@ define createNameIndex
 
 init
 {
-  connect@Database( "mongodb://mongo_db" )()
+  getenv@Runtime( "MONGODB_HOST" )( mongo_host )
+  connect@Database( mongo_host )()
+  |
+  getenv@Runtime( "BUILDER_HOST" )( builder_host )
+  if( builder_host != void ) {
+    Builder.Location = "socket://" + builder_host + ":8005"
+  }
 }
 
 main

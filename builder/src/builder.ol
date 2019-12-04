@@ -3,6 +3,7 @@ include "file.iol"
 include "console.iol"
 include "string_utils.iol"
 include "json_utils.iol"
+include "runtime.iol"
 
 include "builder.iol"
 include "../../lib/database/database.iol"
@@ -34,7 +35,8 @@ define updateStatus
 
 init
 {
-  connect@Database( "mongodb://mongo_db" )()
+  getenv@Runtime( "MONGODB_HOST" )( mongo_host )
+  connect@Database( mongo_host )()
 }
 
 main
