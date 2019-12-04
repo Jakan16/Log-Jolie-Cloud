@@ -20,3 +20,13 @@ script:
   - docker exec parsermanager jolie parserManager/test/submitcode_test.ol
   - docker exec parsermanager jolie parserManager/test/auth_test.ol
   - docker exec builder jolie builder/test/build_container_test.ol
+
+deploy:
+  provider: script
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    - docker tag parserManager:develop porygom/parsermanager:develop
+    - docker push porygom/parsermanager:develop
+    - docker tag builder:develop porygom/builder:develop
+    - docker push porygom/builder:develop
+  on:
+    branch: master
