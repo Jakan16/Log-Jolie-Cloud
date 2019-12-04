@@ -30,7 +30,7 @@ type RetrieveCodeResponse: void {
 
 type DeleteCodeRequest: void {
   authorization: string
-  id: string
+  name: string
 }
 
 type DeleteCodeResponse: void {
@@ -45,7 +45,8 @@ interface SubmitCodeInterface {
         NoName( errorMsg )
         UnAuthorized( errorMsg )
         InvalidType( errorMsg )
-        InvalidCode( errorMsg ),
+        InvalidCode( errorMsg )
+        WriteException( undefined ),
     // Allows a client to retrieve from the log parse code base
     retrieveCode( RetrieveCodeRequest ) ( RetrieveCodeResponse )
       throws UnAuthorized( errorMsg ),

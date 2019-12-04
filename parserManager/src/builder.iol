@@ -1,7 +1,6 @@
 type BuildRequest: void {
   name: string
-  code: string
-  type: string
+  owner: string
 }
 
 interface BuildService {

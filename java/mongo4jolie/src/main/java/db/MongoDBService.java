@@ -4,11 +4,17 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import jolie.runtime.FaultException;
 import jolie.runtime.JavaService;
 import jolie.runtime.Value;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class MongoDBService extends JavaService {
 
@@ -27,6 +33,14 @@ public class MongoDBService extends JavaService {
         if (client == null){
             throw new FaultException("NoConnection", "Not connected have u called Connect() first?");
         }
+    }
+
+    public void createTextIndex( Value request ){
+        IndexOptions indexOptions = new IndexOptions().unique( request.getFirstChild( "unique" ).boolValue() );
+
+        client.getDatabase( request.getFirstChild( "database" ).strValue() )
+                .getCollection( request.getFirstChild( "collection" ).strValue() )
+                .createIndex( Indexes.text(request.getFirstChild( "key" ).strValue()), indexOptions );
     }
 
     public Value insert( Value request ) throws FaultException {
@@ -48,6 +62,14 @@ public class MongoDBService extends JavaService {
         }
 
         return Value.create(true);
+    }
+
+    public Value update( Value request ) throws FaultException {
+        checkConnection();
+        UpdateResult updateResult = client.getDatabase( request.getFirstChild( "database" ).strValue() )
+                .getCollection( request.getFirstChild( "collection" ).strValue() )
+                .updateOne( eq(request.getFirstChild( "key" ).strValue(), request.getFirstChild( "value" ).strValue()), new Document("$set", Document.parse( request.getFirstChild( "document" ).strValue() )));
+        return Value.create( updateResult.getModifiedCount() > 0 );
     }
 
     public Value find( Value request ) throws FaultException {
@@ -80,13 +102,27 @@ public class MongoDBService extends JavaService {
         return response;
     }
 
-    public Value delete( Value request ) throws FaultException {
+    public Value getByValue( Value request ) throws FaultException {
         checkConnection();
 
         MongoCollection<Document> collection = client.getDatabase( request.getFirstChild( "database" ).strValue() )
                 .getCollection( request.getFirstChild( "collection" ).strValue() );
 
-        boolean deleted = collection.deleteOne(new Document("_id", new ObjectId(request.getFirstChild( "id" ).strValue()))).getDeletedCount() > 0;
-        return Value.create(deleted);
+        Document d = collection.find(eq(request.getFirstChild( "key" ).strValue() ,request.getFirstChild( "value" ).strValue() )).first();
+
+        if ( d == null){
+            throw new FaultException("NotFound");
+        }
+
+        return Value.create(d.toJson());
+    }
+
+    public Value delete( Value request ) throws FaultException {
+        checkConnection();
+
+        DeleteResult deleteResult = client.getDatabase( request.getFirstChild( "database" ).strValue() )
+                .getCollection( request.getFirstChild( "collection" ).strValue() ).deleteOne(eq(request.getFirstChild( "key" ).strValue(), request.getFirstChild( "value" ).strValue()));;
+
+        return Value.create( deleteResult.getDeletedCount() > 0 );
     }
 }

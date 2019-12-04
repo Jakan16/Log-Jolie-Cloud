@@ -2,8 +2,10 @@ include "exec.iol"
 include "file.iol"
 include "console.iol"
 include "string_utils.iol"
+include "json_utils.iol"
 
 include "builder.iol"
+include "../../lib/database/database.iol"
 
 execution{ concurrent }
 
@@ -18,30 +20,67 @@ define exec
   command.stdOutConsoleEnable = true
   println@Console( "executing command: " + command )()
   exec@Exec( command )( result )
-  println@Console( result.stderr )()
+
+  if( result.exitCode != 0 ) {
+    throw( ExecutionFault, { .command = command, .result = result} )
+  }
+}
+
+define updateStatus
+{
+  updateReq.document = "{\"status\":\"" + status + "\"}"
+  update@Database(updateReq)()
+}
+
+init
+{
+  connect@Database( "mongodb://mongo_db" )()
 }
 
 main
 {
   build( info )
+  tag = info.name
 
-  writeFile@File( { .filename = "parsercode.temp", .content = info.code} )()
+  with( fetchReq ){
+    .database = "parsers";
+    .collection = info.owner;
+    .key = "name";
+    .value = tag
+  }
+  updateReq -> fetchReq
 
-  trim@StringUtils( info.name )( tag )
-  toLowerCase@StringUtils( tag )( tag )
-  tag.regex = "[^a-z0-9.]"
-  tag.replacement = "_"
-  replaceAll@StringUtils( tag )( tag )
+  getByValue@Database( fetchReq )( json )
+  getJsonValue@JsonUtils( json )( doc )
 
-  if( info.type == "jolie" ) {
+  writeFile@File( { .filename = "parsercode.temp", .content = doc.code} )()
+
+
+  install( ExecutionFault =>
+    {
+      status = "failed"; updateStatus
+      throw( ExecutionFault )
+    } )
+
+  install( UnknownType =>
+    {
+      updateReq.document = "{\"status\":\"failed\"}"
+      update@Database(updateReq)()
+      throw( UnknownType, doc.type + " is not a supported type" )
+    } )
+
+  if( doc.type == "jolie" ) {
+    status = "building"; updateStatus
     command = "docker build -f builder/Dockerfile.jolie -t parsers:" + tag + " ."
     exec
+    status = "pushing"; updateStatus
     command = "docker tag parsers:" + tag + " 591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers:" + tag
     exec
     command = "docker push 591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers:" + tag
     exec
+    status = "build"; updateStatus
   }else{
-    throw( UnknownType, info.type + " is not a supported type" )
+    throw( UnknownType )
   }
 
   res = (result.exitCode == 0)

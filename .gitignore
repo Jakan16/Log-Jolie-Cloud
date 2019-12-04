@@ -2,8 +2,8 @@
 # Created by https://www.gitignore.io/api/maven,intellij
 # Edit at https://www.gitignore.io/?templates=maven,intellij
 
-## generated lib files
-*/lib/*
+## generated jar files
+lib/*.jar
 
 ## temp files
 *.temp

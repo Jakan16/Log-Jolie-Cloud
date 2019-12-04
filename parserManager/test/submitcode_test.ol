@@ -192,7 +192,7 @@ scope( DeleteEntries )
 
   dreq.authorization = "valid_token"
   for ( parser in res.parsers._ ) {
-    dreq.id = parser._id.("$oid")
+    dreq.name = parser.name
     deleteCode@Cloud( dreq )( out )
   }
 

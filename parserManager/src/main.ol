@@ -27,6 +27,18 @@ inputPort sodep {
 
 execution{ concurrent }
 
+define createNameIndex
+{
+  with( createIndex ){
+    .database = "parsers";
+    .collection = user.id;
+    .unique = true;
+    .key = "name"
+  }
+
+  createTextIndex@Database( createIndex )()
+}
+
 init
 {
   connect@Database( "mongodb://mongo_db" )()
@@ -37,10 +49,18 @@ main
   [submitCode( in )( out ){
     {
       authenticate@Auth( in.authorization )( user ) |
-      trim@StringUtils( in.parser.name )( in.parser.name );
-      if( in.parser.name == "" ) {
-        throw( NoName, { .info = "Name cannot be empty" } )
+
+      with( in.parser ){
+        trim@StringUtils( .name )( .name )
+        toLowerCase@StringUtils( .name )( .name )
+        .name.regex = "[^a-z0-9.]"
+        .name.replacement = "_"
+        replaceAll@StringUtils( .name )( .name )
+        if( .name == "" ) {
+          throw( NoName, { .info = "Name cannot be empty" } )
+        }
       }
+
 
       trim@StringUtils( in.parser.code )( in.parser.code );
       if( in.parser.code == "" ) {
@@ -66,10 +86,10 @@ main
       .collection = user.id;
       .document = jsonDoc
     }
-
+    createNameIndex
     insert@Database( insertReq )( out.success )
   }]{
-    build@Builder( in.parser )
+    build@Builder( {.name = in.parser.name, .owner = user.id} )
   }
 
   [retrieveCode( in )( out ){
@@ -105,7 +125,8 @@ main
     with( deleteReq ){
       .database = "parsers";
       .collection = user.id;
-      .id = in.id
+      .key = "name";
+      .value = in.name
     }
 
     delete@Database( deleteReq )( out.success )
