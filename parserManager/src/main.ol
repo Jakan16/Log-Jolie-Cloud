@@ -17,7 +17,7 @@ embedded {
 inputPort http {
   Location: "socket://localhost:8001"
   Protocol: http {
-    .addHeader.header[0] << "Access-Control-Allow-Origin" { .value="'*'" }
+    .addHeader.header[0] << "Access-Control-Allow-Origin" { .value="*" }
   }
 
   Interfaces: SubmitCodeInterface
