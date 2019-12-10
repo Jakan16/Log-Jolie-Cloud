@@ -1,5 +1,5 @@
-type errorMsg: void {
-  info: string
+type errorMsg: string | void {
+  info?: string
 }
 
 type SubmitCodeRequest: void {

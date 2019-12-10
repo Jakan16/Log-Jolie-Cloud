@@ -1,5 +1,5 @@
 type errorMsg: string | void {
-  info: string
+  info?: string
 }
 
 type UserInfo: void {
