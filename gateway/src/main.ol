@@ -41,7 +41,7 @@ interface LogStoreInterface {
 }
 
 outputPort LogStore {
-  Protocol: http {
+  Protocol: https {
     .osc.store.alias = "/gateway";
     .osc.store.method = "POST"
   }
