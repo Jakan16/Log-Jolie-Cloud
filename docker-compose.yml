@@ -1,10 +1,5 @@
 version: "3.7"
 
-networks:
-  testnet:
-    external:
-      name: testnet
-
 services:
   parsermanager:
     build:
@@ -40,7 +35,5 @@ services:
       - PARSER_HOST=parser:27522
       - LOGSTORE_HOST=logstore:8080
     container_name: parsergateway
-    networks:
-      - testnet
   mongo_db:
     image: mongo
