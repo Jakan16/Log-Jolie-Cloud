@@ -32,7 +32,7 @@ services:
     ports:
       - "7999:7999"
     environment:
-      - PARSER_HOST=parser:27522
+      - PARSER_HOST=parser:27521
       - LOGSTORE_HOST=logstore:8080
     container_name: parsergateway
   mongo_db:

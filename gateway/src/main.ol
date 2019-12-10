@@ -31,7 +31,6 @@ inputPort Gateway {
 }
 
 outputPort Parser {
-  Location: "socket://parser:27521"
   Protocol: sodep
   Interfaces: LogParserInterface
 }
@@ -42,7 +41,6 @@ interface LogStoreInterface {
 }
 
 outputPort LogStore {
-  Location: "socket://localhost:8080"
   Protocol: http {
     .osc.store.alias = "/gateway";
     .osc.store.method = "POST"
@@ -59,7 +57,7 @@ init
     halt@Runtime( {.status = 1} )( )
   }
 
-  Parser.Location = "socket://" + PARSER_HOST
+  Parser.location = "socket://" + PARSER_HOST
 
   getenv@Runtime( "LOGSTORE_HOST" )( LOGSTORE_HOST )
   if( LOGSTORE_HOST == void ) {
@@ -67,7 +65,8 @@ init
     halt@Runtime( {.status = 1} )( )
   }
 
-  LogStore.Location = "socket://" + LOGSTORE_HOST
+  LogStore.location = "socket://" + LOGSTORE_HOST
+
 }
 
 main
@@ -87,7 +86,7 @@ main
     };
 
     println@Console( "Forwarding to parser" )()
-    println@Console( Parser.Location )()
+    println@Console( Parser.location )()
     parseLog@Parser( parseReq )( parsedLog )
     println@Console( "Recieved response" )()
     if( parsedLog.discard != true ) {
