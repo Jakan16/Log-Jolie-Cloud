@@ -1,15 +1,20 @@
 include "console.iol"
 include "json_utils.iol"
+include "runtime.iol"
 
 include "parser_interface.iol"
 include "../../lib/auth/auth.iol"
 
+embedded {
+  Jolie:
+    "../../lib/auth/auth.ol" in Auth,
+}
+
 execution{ concurrent }
 
 type Log: void {
-  authentication: string
+  authorization: string
   log: string
-  logtype: string
   timestamp: long
 }
 
@@ -26,44 +31,83 @@ inputPort Gateway {
 }
 
 outputPort Parser {
-Location: "socket://localhost:27521"
-Protocol: sodep
-Interfaces: LogParserInterface
+  Location: "socket://parser:27521"
+  Protocol: sodep
+  Interfaces: LogParserInterface
+}
+
+interface LogStoreInterface {
+  RequestResponse:
+    store
+}
+
+outputPort LogStore {
+  Location: "socket://localhost:8080"
+  Protocol: http {
+    .osc.store.alias = "/gateway";
+    .osc.store.method = "POST"
+  }
+  Interfaces: LogStoreInterface
+}
+
+init
+{
+  println@Console( "Starting gateway" )()
+  getenv@Runtime( "PARSER_HOST" )( PARSER_HOST )
+  if( PARSER_HOST == void ) {
+    println@Console( "PARSER_HOST env not set!" )()
+    halt@Runtime( {.status = 1} )( )
+  }
+
+  Parser.Location = "socket://" + PARSER_HOST
+
+  getenv@Runtime( "LOGSTORE_HOST" )( LOGSTORE_HOST )
+  if( LOGSTORE_HOST == void ) {
+    println@Console( "LOGSTORE_HOST env not set!" )()
+    halt@Runtime( {.status = 1} )( )
+  }
+
+  LogStore.Location = "socket://" + LOGSTORE_HOST
 }
 
 main
 {
   [ submitLog( in )( ){
     authenticate@Auth( in.authorization )( user )
-    if( user.agent_id == void ) {
-      throw( UnAuthorized, "Not an agent id" )
+    if( user.agent == void ) {
+      throw( UnAuthorized, "Access token does not belong to an agent" )
     }
   } ]{
     println@Console( in.log )()
 
     with( parseReq ){
-      .agent = user.agent
-      .timestamp = in.timestamp
-      .logtype = in.logtype
+      .agent = user.agent;
+      .timestamp = in.timestamp;
       .log = in.log
-    }
+    };
 
-    // forward TODO figure out where
+    println@Console( "Forwarding to parser" )()
+    println@Console( Parser.Location )()
     parseLog@Parser( parseReq )( parsedLog )
-
-
+    println@Console( "Recieved response" )()
     if( parsedLog.discard != true ) {
       if( parsedLog.tag == void ) {
         parsedLog.tag = ""
       }
 
       with( log ){
-        .agent = user.agent
+        .logId = new
+        .customerID = user.id
+        .agentID = user.agent
         .timestamp = in.timestamp
+        .logType = parsedLog.logtype
+        .tags = parsedLog.tag
         .content = parsedLog.content
-        .logtype = in.logtype
-        .tag = parsedLog.tag
       }
+        println@Console( "Storing log" )()
+        store@LogStore({ .method = "post", .request = log })()
     }
   }
+
+
 }

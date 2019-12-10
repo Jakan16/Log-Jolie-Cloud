@@ -2,7 +2,6 @@ type logParseRequest: void {
   agent: string
   timestamp: long
   log: string
-  logtype: string
 }
 
 type logParseResponse: void {

@@ -51,7 +51,7 @@ init
   |
   getenv@Runtime( "BUILDER_HOST" )( builder_host )
   if( builder_host != void ) {
-    Builder.Location = "socket://" + builder_host + ":8005"
+    Builder.Location = "socket://" + builder_host
   }
 }
 

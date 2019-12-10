@@ -32,3 +32,5 @@ jobs:
       - docker push porygom/parsermanager:develop
       - docker tag builder:develop porygom/builder:develop
       - docker push porygom/builder:develop
+      - docker tag parsergateway:develop porygom/parsergateway:develop
+      - docker push porygom/parsergateway:develop

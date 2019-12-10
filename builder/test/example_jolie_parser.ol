@@ -1,8 +1,14 @@
 include "parser.iol"
+include "string_utils.iol"
+include "console.iol"
+
+execution{ concurrent }
 
 main
 {
   parseLog( request ) ( response ){
+
+    println@Console( "Parsing log" )()
     response.content = request.log
     response.logtype = "The loggy type"
 

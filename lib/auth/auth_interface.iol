@@ -1,4 +1,4 @@
-type errorMsg: void {
+type errorMsg: string | void {
   info: string
 }
 

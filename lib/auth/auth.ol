@@ -23,6 +23,11 @@ main
             .user.id = "sdighsodgs"
             .user.name = "The cool company"
             .invalid = false
+          } else if ( token == "valid_agent_token" ) {
+            .user.id = "sdighsodgs"
+            .user.name = "The cool company"
+            .user.agent = "nijsdnisagent"
+            .invalid = false
           }else{
             .invalid = true
             throw( UnAuthorized, { .info = "Token could not be authorized" } )
