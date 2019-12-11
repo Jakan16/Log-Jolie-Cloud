@@ -37,13 +37,14 @@ outputPort Parser {
 
 interface LogStoreInterface {
   RequestResponse:
-    store
+    gateway
 }
 
 outputPort LogStore {
   Protocol: https {
-    .osc.store.alias = "/gateway";
-    .osc.store.method = "POST"
+    .contentType = "application/json";
+    .format = "json";
+    .method = "post"
   }
   Interfaces: LogStoreInterface
 }
@@ -77,34 +78,26 @@ main
       throw( UnAuthorized, "Access token does not belong to an agent" )
     }
   } ]{
-    println@Console( in.log )()
-
     with( parseReq ){
       .agent = user.agent;
       .timestamp = in.timestamp;
       .log = in.log
     };
 
-    println@Console( "Forwarding to parser" )()
-    println@Console( Parser.location )()
     parseLog@Parser( parseReq )( parsedLog )
-    println@Console( "Recieved response" )()
-    if( parsedLog.discard != true ) {
-      if( parsedLog.tag == void ) {
-        parsedLog.tag = ""
-      }
 
-      with( log ){
-        .logId = new
-        .customerID = user.id
-        .agentID = user.agent
-        .timestamp = in.timestamp
-        .logType = parsedLog.logtype
-        .tags = parsedLog.tag
-        .content = parsedLog.content
-      }
-        println@Console( "Storing log" )()
-        store@LogStore({ .method = "post", .request = log })()
+    if( parsedLog.discard != true ) {
+      with( logToStore.body ){
+        .log_id = new;
+        .customer_id = user.id;
+        .agent_id = user.agent;
+        .timestamp = in.timestamp;
+        .log_type = parsedLog.logtype;
+        .tags._ -> parsedLog.tag;
+        .content = parsedLog.content;
+        println@Console( "Storing log, id: " + .log_id )()
+      };
+      gateway@LogStore({ .method = "post", .request -> logToStore })( res )
     }
   }
 

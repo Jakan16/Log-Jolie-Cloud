@@ -18,6 +18,7 @@ main
 
     substring@StringUtils( c )( tag )
 
-    response.tag = tag
+    response.tag[0] = tag
+    response.tag[1] = "other tag"
   }
 }

@@ -7,7 +7,7 @@ type logParseRequest: void {
 type logParseResponse: void {
   content: undefined
   logtype: string
-  tag?: string
+  tag*: string
   discard?: bool
 }
 
