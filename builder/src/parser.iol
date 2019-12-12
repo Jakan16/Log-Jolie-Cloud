@@ -5,10 +5,14 @@ type logParseRequest: void {
 }
 
 type logParseResponse: void {
-  content: undefined
+  content: string
   logtype: string
   tag*: string
   discard?: bool
+  alert?: void {
+    name?: string
+    severity?: string
+  }
 }
 
 interface LogParserInterface {

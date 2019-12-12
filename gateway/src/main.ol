@@ -49,6 +49,21 @@ outputPort LogStore {
   Interfaces: LogStoreInterface
 }
 
+interface AlarmServiceInterface {
+  RequestResponse:
+    alarms
+  OneWay:
+}
+
+outputPort AlarmService {
+  Protocol: https {
+    .contentType = "application/json";
+    .format = "json";
+    .method = "post"
+  }
+  Interfaces: AlarmServiceInterface
+}
+
 init
 {
   println@Console( "Starting gateway" )()
@@ -67,6 +82,14 @@ init
   }
 
   LogStore.location = "socket://" + LOGSTORE_HOST
+
+  getenv@Runtime( "ALARMSERVICE_HOST" )( ALARMSERVICE_HOST )
+  if( ALARMSERVICE_HOST == void ) {
+    println@Console( "ALARMSERVICE_HOST env not set!" )()
+    halt@Runtime( {.status = 1} )( )
+  }
+
+  AlarmService.location = "socket://" + ALARMSERVICE_HOST
 
 }
 
@@ -98,6 +121,20 @@ main
         println@Console( "Storing log, id: " + .log_id )()
       };
       gateway@LogStore({ .method = "post", .request -> logToStore })( res )
+    }
+
+    if( is_defined( parsedLog.alert ) ) {
+      with( alertToSend ){
+        .customer_id = user.id;
+        .timestamp = in.timestamp;
+        .name = parsedLog.alert.name;
+        .severity = parsedLog.alert.severity;
+        println@Console( "Raising alart: " + .name )()
+      };
+
+      println@Console( alertToSend.name )();
+      println@Console( alertToSend.severity )()
+      alarms@AlarmService( alertToSend )()
     }
   }
 
