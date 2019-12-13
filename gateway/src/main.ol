@@ -127,11 +127,10 @@ main
 
     if( is_defined( parsedLog.alert ) ) {
       with( alertToSend ){
-        .log_id = log_id;
-        .customer_id = user.id;
-        .timestamp = in.timestamp;
         .name = parsedLog.alert.name;
         .severity = parsedLog.alert.severity;
+        .log_id = log_id;
+        .customer_id = user.id;
         println@Console( "Raising alart: " + .name )()
       };
 
