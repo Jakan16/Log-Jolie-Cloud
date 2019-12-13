@@ -109,9 +109,11 @@ main
 
     parseLog@Parser( parseReq )( parsedLog )
 
+    log_id = new
+
     if( parsedLog.discard != true ) {
       with( logToStore.body ){
-        .log_id = new;
+        .log_id = log_id;
         .customer_id = user.id;
         .agent_id = user.agent;
         .timestamp = in.timestamp;
@@ -125,6 +127,7 @@ main
 
     if( is_defined( parsedLog.alert ) ) {
       with( alertToSend ){
+        .log_id = log_id;
         .customer_id = user.id;
         .timestamp = in.timestamp;
         .name = parsedLog.alert.name;
@@ -132,8 +135,6 @@ main
         println@Console( "Raising alart: " + .name )()
       };
 
-      println@Console( alertToSend.name )();
-      println@Console( alertToSend.severity )()
       alarms@AlarmService( alertToSend )()
     }
   }
