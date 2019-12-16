@@ -2,7 +2,14 @@ include "parser.iol"
 include "string_utils.iol"
 include "console.iol"
 
+include "file.iol"
+
 execution{ concurrent }
+
+init
+{
+  writeFile@File( {.filename = "seen", .content = "init2"} )( )
+}
 
 main
 {
@@ -20,6 +27,8 @@ main
 
     response.tag[0] = tag
     response.tag[1] = "other tag"
+
+    writeFile@File( {.filename = "seen", .content = tag, append = 1} )( )
 
     s = request.log
     s.prefix = "alert"

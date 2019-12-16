@@ -6,138 +6,233 @@ import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.custom.IntOrString;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Config;
-import io.kubernetes.client.util.Yaml;
+import jolie.runtime.FaultException;
+import jolie.runtime.Value;
 
+import javax.swing.text.html.parser.Parser;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ParserDeploy {
+    private AppsV1Api apiApps;
 
-    public static void main(String[] args) {
+    private CoreV1Api apiCore;
 
-        try {
-            ApiClient client = Config.defaultClient();
-            Configuration.setDefaultApiClient(client);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws IOException, FaultException, InterruptedException {
+        ParserDeploy parserDeploy = new ParserDeploy();
 
-        String name = "bsfbns";
+        parserDeploy.deleteDeployAndService( "kage" );
+        parserDeploy.deployWithService( "kage", 2, 2, "porygom/parsergateway:develop", "porygom/example_parser:develop");
+        Thread.sleep(15000);
+        parserDeploy.getGatewayIp( "kage" );
+    }
 
-        V1Service svc =
+    public ParserDeploy() throws IOException {
+        ApiClient client = Config.defaultClient();
+        Configuration.setDefaultApiClient(client);
+
+        apiApps = new AppsV1Api();
+        apiCore = new CoreV1Api();
+    }
+
+    public boolean deployWithService(String name, int gateWayReplicas, int parserReplicas, String gatewayImage, String parserImage) throws FaultException {
+
+/////////////////// gatewayService ////////////////////////////
+        V1Service gatewayService =
+                new V1ServiceBuilder()
+                        .withNewMetadata()
+                        .withName("parser-gateway-service-" + name)
+                        .addToLabels("service", name + "-gateway")
+                        .endMetadata()
+                        .withNewSpec()
+                        .addToSelector("app", name + "-gateway")
+                        .withNewType("NodePort")
+                        .addNewPort()
+                        .withProtocol("TCP")
+                        .withName("parser-gateway-port")
+                        .withPort(7999)
+                        .withTargetPort(new IntOrString(7999))
+                        .endPort()
+                        .endSpec()
+                        .build();
+
+/////////////////// gatewayDeployment ////////////////////////////
+        List<V1EnvVar> gatewayEnvironment = new LinkedList<>();
+
+        gatewayEnvironment.add(
+                new V1EnvVarBuilder()
+                        .withName( "PARSER_HOST" )
+                        .withValue( "parser-service-" + name + ":27521" )
+                        .build());
+
+        gatewayEnvironment.add(
+                new V1EnvVarBuilder()
+                        .withName( "LOGSTORE_HOST" )
+                        .withValue( "logstore:8080" )
+                        .build());
+
+        gatewayEnvironment.add(
+                new V1EnvVarBuilder()
+                        .withName( "ALARMSERVICE_HOST" )
+                        .withValue( "alarmservice:8005" )
+                        .build());
+
+        V1PodTemplateSpec gatewayTemplate = new V1PodTemplateSpecBuilder()
+                .withNewMetadata()
+                .addToLabels("app", name + "-gateway")
+                .endMetadata()
+                .withSpec(
+                        new V1PodSpecBuilder()
+                                .addNewContainer()
+                                .withName(name + "-gateway")
+                                .withImage( gatewayImage )
+                                .addNewPort()
+                                .withContainerPort(7999)
+                                .endPort()
+                                .withEnv( gatewayEnvironment )
+                                .and().build()
+                ).build();
+
+        V1DeploymentSpec gatewaySpec = new V1DeploymentSpecBuilder()
+                .withReplicas(gateWayReplicas)
+                .withNewSelector()
+                .addToMatchLabels("app", name + "-gateway")
+                .endSelector()
+                .withTemplate( gatewayTemplate )
+                .build();
+
+        V1Deployment gatewayDeployment = new V1DeploymentBuilder()
+                .withNewMetadata()
+                .withName(name + "-gateway")
+                .addToLabels("app", name + "-gateway")
+                .endMetadata()
+                .withSpec(gatewaySpec)
+                .build();
+
+/////////////////// parserService ////////////////////////////
+
+        V1Service parserService =
                 new V1ServiceBuilder()
                         .withNewMetadata()
                         .withName("parser-service-" + name)
                         .endMetadata()
                         .withNewSpec()
-                        .addToSelector("app", name + "-gateway")
-                        .withNewType("NodePort")
-                        .withType("NodePort")
+                        .addToSelector("app", name + "-parser")
                         .addNewPort()
                         .withProtocol("TCP")
                         .withName("client")
-                        .withPort(7999)
-                        .withNodePort(30005)
-                        .withTargetPort(new IntOrString(7999))
+                        .withPort(27521)
+                        .withTargetPort(new IntOrString(27521))
                         .endPort()
                         .endSpec()
                         .build();
-        System.out.println(Yaml.dump(svc));
 
-        V1PodTemplateSpec gateway = new V1PodTemplateSpecBuilder()
+/////////////////// parserDeployment ////////////////////////////
+
+        V1PodTemplateSpec parserTemplate = new V1PodTemplateSpecBuilder()
                 .withNewMetadata()
-                .addToLabels("app", name + "-gateway")
+                .addToLabels("app", name + "-parser")
                 .endMetadata()
                 .withSpec(
-                        new V1PodSpecBuilder().addNewContainer().withName(name + "-gateway").withImage("porygom/parsergateway:develop").addNewPort().withContainerPort(7999).endPort().and().build()
-                ).build();
-
-        V1DeploymentSpec gatewaySpec = new V1DeploymentSpecBuilder()
-                .withReplicas(2)
-                .withNewSelector()
-                .addToMatchLabels("app", name + "-gateway")
-                .endSelector()
-                .withTemplate(gateway)
-                .build();
-
-        V1Deployment deployment = new V1DeploymentBuilder()
-                .withNewMetadata()
-                .withName(name + "-gateway")
-                .addToLabels("app", name + "-gateway")
-                .endMetadata()
-                .withSpec(gatewaySpec)
-                .build();
-
-        System.out.println(Yaml.dump(deployment));
-
-        AppsV1Api apiApps = new AppsV1Api();
-
-        CoreV1Api apiCore = new CoreV1Api();
-
-
-        try {
-            //apiCore.createNamespacedService("default", svc, null, null, null);
-            apiApps.deleteNamespacedDeployment(name + "-gateway", "default", null, new V1DeleteOptions(), null, null, null, null);
-            //apiApps.createNamespacedDeployment("default", deployment, null, null, null);
-        } catch (ApiException e) {
-            e.printStackTrace();
-            System.out.println(e.getResponseBody());
-        }
-
-
-        /*V1PodTemplateSpec parser = new V1PodTemplateSpecBuilder()
-                .withNewMetadata()
-                .addToLabels("app", name + "-gateway")
-                .endMetadata()
-                .withSpec(
-                        new V1PodSpecBuilder().addNewContainer().withName(name + "-gateway").withImage("porygom/parsergateway").addNewPort().withContainerPort(7999).endPort().and().build()
+                        new V1PodSpecBuilder()
+                                .addNewContainer()
+                                .withName(name + "-parser")
+                                .withImage( parserImage )
+                                .addNewPort()
+                                .withContainerPort( 27521 )
+                                .endPort()
+                                .and().build()
                 ).build();
 
         V1DeploymentSpec parserSpec = new V1DeploymentSpecBuilder()
-                .withReplicas(2)
+                .withReplicas(parserReplicas)
                 .withNewSelector()
-                .addToMatchLabels("app", name + "-gateway")
+                .addToMatchLabels("app", name + "-parser")
                 .endSelector()
-                .withTemplate(gateway)
+                .withTemplate( parserTemplate )
                 .build();
 
         V1Deployment parserDeployment = new V1DeploymentBuilder()
                 .withNewMetadata()
-                .withName(name + "-gateway")
-                .addToLabels("app", name + "-gateway")
+                .withName(name + "-parser")
+                .addToLabels("app", name + "-parser")
                 .endMetadata()
-                .withSpec(gatewaySpec)
+                .withSpec(parserSpec)
                 .build();
 
-        System.out.println(Yaml.dump(deployment));
+///////////////////////////////////////////////////////////////////
+        AppsV1Api apiApps = new AppsV1Api();
 
+        CoreV1Api apiCore = new CoreV1Api();
 
-        V1Service svc =
-                new V1ServiceBuilder()
-                        .withNewMetadata()
-                        .withName("aservice")
-                        .endMetadata()
-                        .withNewSpec()
-                        .withSessionAffinity("ClientIP")
-                        .withType("NodePort")
-                        .addNewPort()
-                        .withProtocol("TCP")
-                        .withName("client")
-                        .withPort(8008)
-                        .withNodePort(8080)
-                        .withTargetPort(new IntOrString(8080))
-                        .endPort()
-                        .endSpec()
-                        .build();*/
-        //System.out.println(Yaml.dump(svc));
-    }
+        try {
+            apiCore.createNamespacedService("default", parserService, null, null, null);
+            apiCore.createNamespacedService("default", gatewayService, null, null, null);
 
-    public void connect(){
-        /*try {
-            ApiClient client = Config.defaultClient();
-            Configuration.setDefaultApiClient(client);
-        } catch (IOException e) {
+            apiApps.createNamespacedDeployment("default", parserDeployment, null, null, null);
+            apiApps.createNamespacedDeployment("default", gatewayDeployment, null, null, null);
+
+            return true;
+        } catch (ApiException e) {
             e.printStackTrace();
-        }*/
+            throw new FaultException("KubernetesFault", e);
+        }
     }
 
+    boolean deleteDeployAndService(String name) throws FaultException {
+        try {
+
+            apiCore.deleteNamespacedService("parser-gateway-service-" + name, "default", null, new V1DeleteOptions(), null, null, null, null);
+            apiCore.deleteNamespacedService("parser-service-" + name, "default", null, new V1DeleteOptions(), null, null, null, null);
+
+            apiApps.deleteNamespacedDeployment(name + "-gateway", "default", null, new V1DeleteOptions(), null, null, null, null);
+            apiApps.deleteNamespacedDeployment(name + "-parser", "default", null, new V1DeleteOptions(), null, null, null, null);
+
+            return true;
+        } catch (ApiException e) {
+            e.printStackTrace();
+            throw new FaultException("KubernetesFault", e);
+        }
+    }
+
+    Value getGatewayIp( String name ) throws FaultException {
+        try {
+
+            V1ServiceList listNamespacedService = apiCore.listNamespacedService( "default", false, null, null,  null, "service=" + name + "-gateway", 1, null, null, false);
+
+            Value response = Value.create();
+            Value IPs = response.getFirstChild("IPs");
+
+            System.out.println( "Printing ips" );
+
+            for (V1Service service: listNamespacedService.getItems()){
+
+                Integer port = null;
+                for (V1ServicePort servicePort: service.getSpec().getPorts()){
+                    if (servicePort.getName().equals("parser-gateway-port")){
+                        port = servicePort.getNodePort();
+                        break;
+                    }
+                }
+
+                if (port != null) {
+                    for (String IPString : service.getSpec().getExternalIPs()) {
+                        IPs.add(Value.create(IPString + ":" + port));
+                        System.out.println(IPString + ":" + port);
+                    }
+
+                    for (String IPString : service.getSpec().getExternalIPs()) {
+                        IPs.add(Value.create(IPString + ":" + port));
+                        System.out.println(IPString + ":" + port);
+                    }
+                }
+            }
+
+            return response;
+        } catch (ApiException e) {
+            e.printStackTrace();
+            throw new FaultException( "KubernetesFault", e );
+        }
+    }
 }
