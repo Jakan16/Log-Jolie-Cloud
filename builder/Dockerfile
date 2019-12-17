@@ -16,4 +16,4 @@ WORKDIR /root
 COPY builder builder
 COPY lib lib
 COPY builder/lib lib
-CMD $(aws ecr get-login --no-include-email --region eu-central-1) && jolie builder/src/builder.ol
+CMD $(aws ecr get-login --no-include-email --region eu-central-1) && aws eks --region eu-central-1 update-kubeconfig --name LogOpsCluster && jolie builder/src/builder.ol
