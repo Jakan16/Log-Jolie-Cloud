@@ -65,7 +65,7 @@ main
         trim@StringUtils( .name )( .name )
         toLowerCase@StringUtils( .name )( .name )
         .name.regex = "[^a-z0-9.]"
-        .name.replacement = "_"
+        .name.replacement = "-"
         replaceAll@StringUtils( .name )( .name )
         if( .name == "" ) {
           throw( NoName, { .info = "Name cannot be empty" } )

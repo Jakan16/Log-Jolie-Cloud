@@ -183,7 +183,7 @@ public class ParserDeploy extends JavaService {
 
             return Value.create(true);
         } catch (ApiException e) {
-            e.printStackTrace();
+            System.out.println( e.getResponseBody() );
             throw new FaultException("KubernetesFault", e);
         }
     }
