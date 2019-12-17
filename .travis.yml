@@ -12,6 +12,7 @@ jobs:
 
       install:
         - (cd java/mongo4jolie && mvn package)
+        - (cd ParserDeploy && mvn package)
         - docker-compose build
 
       before_script:

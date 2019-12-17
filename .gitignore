@@ -4,6 +4,7 @@
 
 ## generated jar files
 lib/*.jar
+*/lib/*.jar
 
 ## temp files
 *.temp
