@@ -8,6 +8,7 @@ import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.custom.IntOrString;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Config;
+import io.kubernetes.client.util.Yaml;
 import jolie.runtime.FaultException;
 import jolie.runtime.JavaService;
 import jolie.runtime.Value;
@@ -21,14 +22,27 @@ public class ParserDeploy extends JavaService {
 
     private CoreV1Api apiCore;
 
-    /*public static void main(String[] args) throws IOException, FaultException, InterruptedException {
-        pd.ParserDeploy parserDeploy = new pd.ParserDeploy();
-
-        parserDeploy.deleteDeployAndService( "kage" );
-        parserDeploy.deployWithService( "kage", 2, 2, "porygom/parsergateway:develop", "porygom/example_parser:develop");
-        Thread.sleep(15000);
-        parserDeploy.getGatewayIp( "kage" );
-    }*/
+    public static void main(String[] args) throws IOException, FaultException, InterruptedException {
+        String name = "kage";
+        V1Service gatewayService =
+                new V1ServiceBuilder()
+                        .withNewMetadata()
+                        .withName("parser-gateway-service-" + name)
+                        .addToLabels("service", name + "-gateway")
+                        .endMetadata()
+                        .withNewSpec()
+                        .addToSelector("app", name + "-gateway")
+                        .withNewType("LoadBalancer")
+                        .addNewPort()
+                        .withProtocol("TCP")
+                        .withName("parser-gateway-port")
+                        .withPort(7999)
+                        .withTargetPort(new IntOrString(7999))
+                        .endPort()
+                        .endSpec()
+                        .build();
+        System.out.println(Yaml.dump(gatewayService));
+    }
 
     public ParserDeploy() throws IOException {
         ApiClient client = Config.defaultClient();
@@ -55,7 +69,7 @@ public class ParserDeploy extends JavaService {
                         .endMetadata()
                         .withNewSpec()
                         .addToSelector("app", name + "-gateway")
-                        .withNewType("NodePort")
+                        .withNewType("LoadBalancer")
                         .addNewPort()
                         .withProtocol("TCP")
                         .withName("parser-gateway-port")

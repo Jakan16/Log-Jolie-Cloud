@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: parsermanager-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: parsermanager
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: builder-service
+spec:
+  selector:
+    app: builder
+  ports:
+    - protocol: TCP
+      port: 8005
+      targetPort: 8005
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongo_db
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parsermanager-deployment
+  labels:
+    app: parsermanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parsermanager
+  template:
+    metadata:
+      labels:
+        app: parsermanager
+    spec:
+      containers:
+      - name: parsermanager
+        image: porygom/parsermanager:develop
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+        env:
+        - name: MONGODB_HOST
+          value: mongodb://mongo-service
+        - name: BUILDER_HOST
+          value: builder-service:8005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: builder-deployment
+  labels:
+    app: builder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: builder
+  template:
+    metadata:
+      labels:
+        app: builder
+    spec:
+      containers:
+      - name: builder
+        image: porygom/builder:develop
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8005
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: access_key
+        - name: AWS_SECRET_ACCESS_KEY
+          value: secret_key
+        - name: MONGODB_HOST
+          value: mongodb://mongo-service
+        - name: PARSER_REPO
+          value: 591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: dockersock
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-db-deployment
+  labels:
+    app: mongo_db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo_db
+  template:
+    metadata:
+      labels:
+        app: mongo_db
+    spec:
+      containers:
+      - name: mongo-db
+        image: mongo
+        ports:
+        - containerPort: 27017

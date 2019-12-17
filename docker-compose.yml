@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: ./parserManager/Dockerfile
-    image: parsermanager:develop
+    image: porygom/parsermanager:develop
     ports:
       - "8001:8001"
     environment:
@@ -16,7 +16,7 @@ services:
     build:
       context: .
       dockerfile: ./builder/Dockerfile
-    image: builder:develop
+    image: porygom/builder:develop
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -29,7 +29,7 @@ services:
     build:
       context: .
       dockerfile: ./gateway/Dockerfile
-    image: parsergateway:develop
+    image: porygom/parsergateway:develop
     ports:
       - "7999:7999"
     environment:

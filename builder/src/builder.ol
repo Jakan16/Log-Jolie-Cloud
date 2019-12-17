@@ -88,6 +88,7 @@ main
        exec
        status = "build"; updateStatus
 
+       println@Console( "deploying " + tag )()
        deployWithService@ParserDeploy( {
            name = tag,
            gateWayReplicas = 2,
@@ -96,6 +97,12 @@ main
            //parserImage = "porygom/example_parser:develop"
            parserImage = repoImageName
          } )( success )
+
+      if( success ) {
+        println@Console( "deployment " + tag + " launched")()
+      }else {
+        println@Console( "deployment " + tag + " failed")()
+      }
 
      }else{
        throw( UnknownType, doc.type + " is not supported" )
