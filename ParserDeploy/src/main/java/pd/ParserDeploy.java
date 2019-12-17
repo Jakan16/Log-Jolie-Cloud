@@ -1,3 +1,5 @@
+package pd;
+
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
@@ -7,26 +9,26 @@ import io.kubernetes.client.custom.IntOrString;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Config;
 import jolie.runtime.FaultException;
+import jolie.runtime.JavaService;
 import jolie.runtime.Value;
 
-import javax.swing.text.html.parser.Parser;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ParserDeploy {
+public class ParserDeploy extends JavaService {
     private AppsV1Api apiApps;
 
     private CoreV1Api apiCore;
 
-    public static void main(String[] args) throws IOException, FaultException, InterruptedException {
-        ParserDeploy parserDeploy = new ParserDeploy();
+    /*public static void main(String[] args) throws IOException, FaultException, InterruptedException {
+        pd.ParserDeploy parserDeploy = new pd.ParserDeploy();
 
         parserDeploy.deleteDeployAndService( "kage" );
         parserDeploy.deployWithService( "kage", 2, 2, "porygom/parsergateway:develop", "porygom/example_parser:develop");
         Thread.sleep(15000);
         parserDeploy.getGatewayIp( "kage" );
-    }
+    }*/
 
     public ParserDeploy() throws IOException {
         ApiClient client = Config.defaultClient();
@@ -36,7 +38,13 @@ public class ParserDeploy {
         apiCore = new CoreV1Api();
     }
 
-    public boolean deployWithService(String name, int gateWayReplicas, int parserReplicas, String gatewayImage, String parserImage) throws FaultException {
+    public Value deployWithService( Value req ) throws FaultException {
+
+        String name = req.getFirstChild( "name" ).strValue();
+        int gateWayReplicas = req.getFirstChild( "gateWayReplicas" ).intValue();
+        int parserReplicas = req.getFirstChild( "parserReplicas" ).intValue();
+        String gatewayImage = req.getFirstChild( "gatewayImage" ).strValue();
+        String parserImage = req.getFirstChild( "parserImage" ).strValue();
 
 /////////////////// gatewayService ////////////////////////////
         V1Service gatewayService =
@@ -173,14 +181,14 @@ public class ParserDeploy {
             apiApps.createNamespacedDeployment("default", parserDeployment, null, null, null);
             apiApps.createNamespacedDeployment("default", gatewayDeployment, null, null, null);
 
-            return true;
+            return Value.create(true);
         } catch (ApiException e) {
             e.printStackTrace();
             throw new FaultException("KubernetesFault", e);
         }
     }
 
-    boolean deleteDeployAndService(String name) throws FaultException {
+    public Value deleteDeployAndService( String name ) throws FaultException {
         try {
 
             apiCore.deleteNamespacedService("parser-gateway-service-" + name, "default", null, new V1DeleteOptions(), null, null, null, null);
@@ -189,14 +197,14 @@ public class ParserDeploy {
             apiApps.deleteNamespacedDeployment(name + "-gateway", "default", null, new V1DeleteOptions(), null, null, null, null);
             apiApps.deleteNamespacedDeployment(name + "-parser", "default", null, new V1DeleteOptions(), null, null, null, null);
 
-            return true;
+            return Value.create(true);
         } catch (ApiException e) {
             e.printStackTrace();
             throw new FaultException("KubernetesFault", e);
         }
     }
 
-    Value getGatewayIp( String name ) throws FaultException {
+    public Value getGatewayIp( String name ) throws FaultException {
         try {
 
             V1ServiceList listNamespacedService = apiCore.listNamespacedService( "default", false, null, null,  null, "service=" + name + "-gateway", 1, null, null, false);
@@ -217,11 +225,6 @@ public class ParserDeploy {
                 }
 
                 if (port != null) {
-                    for (String IPString : service.getSpec().getExternalIPs()) {
-                        IPs.add(Value.create(IPString + ":" + port));
-                        System.out.println(IPString + ":" + port);
-                    }
-
                     for (String IPString : service.getSpec().getExternalIPs()) {
                         IPs.add(Value.create(IPString + ":" + port));
                         System.out.println(IPString + ":" + port);

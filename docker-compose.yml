@@ -21,6 +21,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - MONGODB_HOST=mongodb://mongo_db
+      - PARSER_REPO=591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     container_name: builder
@@ -34,6 +35,7 @@ services:
     environment:
       - PARSER_HOST=parser:27521
       - LOGSTORE_HOST=logstore:8080
+      - ALARMSERVICE_HOST=alarmservice:8005
     container_name: parsergateway
   mongo_db:
     image: mongo
