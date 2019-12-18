@@ -23,25 +23,18 @@ public class ParserDeploy extends JavaService {
     private CoreV1Api apiCore;
 
     public static void main(String[] args) throws IOException, FaultException, InterruptedException {
-        String name = "kage";
-        V1Service gatewayService =
-                new V1ServiceBuilder()
-                        .withNewMetadata()
-                        .withName("parser-gateway-service-" + name)
-                        .addToLabels("service", name + "-gateway")
-                        .endMetadata()
-                        .withNewSpec()
-                        .addToSelector("app", name + "-gateway")
-                        .withNewType("LoadBalancer")
-                        .addNewPort()
-                        .withProtocol("TCP")
-                        .withName("parser-gateway-port")
-                        .withPort(7999)
-                        .withTargetPort(new IntOrString(7999))
-                        .endPort()
-                        .endSpec()
-                        .build();
-        System.out.println(Yaml.dump(gatewayService));
+        Value v = Value.create();
+        v.getFirstChild( "name" ).setValue( "kage" );
+        v.getFirstChild( "gateWayReplicas" ).setValue(1);
+        v.getFirstChild( "parserReplicas" ).setValue(1);
+        v.getFirstChild( "gatewayImage" ).setValue( "porygom/parsergateway:develop" );
+        v.getFirstChild( "parserImage" ).setValue( "porygom/example_parser:develop" );
+
+        ParserDeploy parserDeploy = new ParserDeploy();
+        //parserDeploy.deployWithService(v);
+        parserDeploy.deleteDeployAndService( "kage" );
+        //Thread.sleep(10);
+        parserDeploy.getGatewayIp( "kage" );
     }
 
     public ParserDeploy() throws IOException {
@@ -224,7 +217,6 @@ public class ParserDeploy extends JavaService {
             V1ServiceList listNamespacedService = apiCore.listNamespacedService( "default", false, null, null,  null, "service=" + name + "-gateway", 1, null, null, false);
 
             Value response = Value.create();
-            Value IPs = response.getFirstChild("IPs");
 
             System.out.println( "Printing ips" );
 
@@ -233,17 +225,20 @@ public class ParserDeploy extends JavaService {
                 Integer port = null;
                 for (V1ServicePort servicePort: service.getSpec().getPorts()){
                     if (servicePort.getName().equals("parser-gateway-port")){
-                        port = servicePort.getNodePort();
+                        port = servicePort.getPort();
                         break;
                     }
                 }
 
-                if (port != null) {
-                    for (String IPString : service.getSpec().getExternalIPs()) {
-                        IPs.add(Value.create(IPString + ":" + port));
-                        System.out.println(IPString + ":" + port);
+                if (port != null){
+                    String host = service.getStatus().getLoadBalancer().getIngress().get(0).getHostname();
+
+                    if (host != null){
+                        response.getFirstChild("IPs").add(Value.create(host + ":" + port));
+                        System.out.println(host + ":" + port);
                     }
                 }
+
             }
 
             return response;

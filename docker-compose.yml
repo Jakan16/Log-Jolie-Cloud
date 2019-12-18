@@ -17,6 +17,8 @@ services:
       context: .
       dockerfile: ./builder/Dockerfile
     image: porygom/builder:develop
+    ports:
+      - "8006:8006"
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -25,6 +27,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     container_name: builder
+  mongo_db:
+    image: mongo
   parsergateway:
     build:
       context: .
@@ -37,5 +41,7 @@ services:
       - LOGSTORE_HOST=logstore:8080
       - ALARMSERVICE_HOST=alarmservice:8005
     container_name: parsergateway
-  mongo_db:
-    image: mongo
+  parser:
+    image: porygom/example_parser:develop
+    ports:
+      - "27521:27521"

@@ -14,8 +14,23 @@ execution{ concurrent }
 inputPort builderService {
   Location: "socket://localhost:8005"
   Protocol: sodep
-  Interfaces: BuildService, ParserDeployInterface
-  Aggregates: ParserDeploy
+  Interfaces: BuildService
+}
+
+type GetHostType: void {
+  parser_name: string
+}
+
+interface ParserHostInterface {
+  RequestResponse:
+    getParserHost( GetHostType )( GatewayIpResponse )
+  OneWay:
+}
+
+inputPort parserService {
+  Location: "socket://localhost:8006"
+  Protocol: http
+  Interfaces: ParserHostInterface
 }
 
 define exec
@@ -45,6 +60,14 @@ init
 
 main
 {
+  [ getParserHost( request )( response ) {
+    getGatewayIp@ParserDeploy( request.parser_name )( response )
+    if( !is_defined( response.IPs ) ) {
+      // Ensures IPs is always present, even if the array is empty
+      getJsonValue@JsonUtils( "{\"IPs\":[]}" )( response )
+    }
+  } ]
+
    [ build( info ) ] {
      tag = info.name
 

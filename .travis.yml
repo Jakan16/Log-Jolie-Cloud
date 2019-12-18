@@ -38,10 +38,7 @@ jobs:
 
       script:
         - docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-        - docker tag parsermanager:develop porygom/parsermanager:develop
         - docker push porygom/parsermanager:develop
-        - docker tag builder:develop porygom/builder:develop
         - docker push porygom/builder:develop
-        - docker tag parsergateway:develop porygom/parsergateway:develop
         - docker push porygom/parsergateway:develop
       if: branch = master
