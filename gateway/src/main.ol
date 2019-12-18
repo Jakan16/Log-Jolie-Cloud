@@ -41,7 +41,7 @@ interface LogStoreInterface {
 }
 
 outputPort LogStore {
-  Protocol: https {
+  Protocol: http {
     .contentType = "application/json";
     .format = "json";
     .method = "post"
@@ -56,7 +56,7 @@ interface AlarmServiceInterface {
 }
 
 outputPort AlarmService {
-  Protocol: https {
+  Protocol: http {
     .contentType = "application/json";
     .format = "json";
     .method = "post"
