@@ -31,8 +31,8 @@ public class ParserDeploy extends JavaService {
         v.getFirstChild( "parserImage" ).setValue( "porygom/example_parser:develop" );
 
         ParserDeploy parserDeploy = new ParserDeploy();
-        //parserDeploy.deployWithService(v);
         parserDeploy.deleteDeployAndService( "kage" );
+        parserDeploy.deployWithService(v);
         //Thread.sleep(10);
         parserDeploy.getGatewayIp( "kage" );
     }
@@ -84,13 +84,13 @@ public class ParserDeploy extends JavaService {
         gatewayEnvironment.add(
                 new V1EnvVarBuilder()
                         .withName( "LOGSTORE_HOST" )
-                        .withValue( "logstore:8080" )
+                        .withValue( "log-store-service:8080" )
                         .build());
 
         gatewayEnvironment.add(
                 new V1EnvVarBuilder()
                         .withName( "ALARMSERVICE_HOST" )
-                        .withValue( "alarmservice:8005" )
+                        .withValue( "alarm-service:8085" )
                         .build());
 
         V1PodTemplateSpec gatewayTemplate = new V1PodTemplateSpecBuilder()
@@ -102,6 +102,7 @@ public class ParserDeploy extends JavaService {
                                 .addNewContainer()
                                 .withName(name + "-gateway")
                                 .withImage( gatewayImage )
+                                .withImagePullPolicy("Always")
                                 .addNewPort()
                                 .withContainerPort(7999)
                                 .endPort()
