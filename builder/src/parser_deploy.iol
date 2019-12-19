@@ -5,6 +5,9 @@ type DeployRequest: void {
   parserReplicas: int
   gatewayImage: string
   parserImage: string
+  cpuPerInstance: int
+  mbMemPerInstance: int
+  owner: string
 }
 
 type GatewayIpResponse: void {

@@ -91,12 +91,23 @@ init
 
   AlarmService.location = "socket://" + ALARMSERVICE_HOST
 
+  getenv@Runtime( "OWNER" )( OWNER )
+  if( OWNER == void ) {
+    println@Console( "OWNER env not set!" )()
+    halt@Runtime( {.status = 1} )( )
+  }
+
 }
 
 main
 {
   [ submitLog( in )( ){
     authenticate@Auth( in.authorization )( user )
+
+    if( user.id != OWNER) {
+      throw( UnAuthorized, "This service does not allow access for " + user.id )
+    }
+
     if( user.agent == void ) {
       throw( UnAuthorized, "Access token does not belong to an agent" )
     }

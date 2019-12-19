@@ -69,13 +69,22 @@ main
   } ]
 
    [ build( info ) ] {
-     tag = info.name
+
+     println@Console( "Building" )()
+
+     info.owner.regex = "[^a-z0-9.]"
+     info.owner.replacement = "-"
+     replaceAll@StringUtils( info.owner )( ownerdns )
+
+     tag = info.name + "-" + ownerdns
+
+     println@Console( "tag: " + tag )()
 
      with( fetchReq ){
        .database = "parsers";
        .collection = info.owner;
        .key = "name";
-       .value = tag
+       .value = info.name
      }
      updateReq -> fetchReq
 
@@ -83,7 +92,6 @@ main
      getJsonValue@JsonUtils( json )( doc )
 
      writeFile@File( { .filename = "parsercode.temp", .content = doc.code} )()
-
 
      install( ExecutionFault =>
        {
@@ -114,11 +122,14 @@ main
        println@Console( "deploying " + tag )()
        deployWithService@ParserDeploy( {
            name = tag,
+           owner = info.owner,
            gateWayReplicas = 2,
            parserReplicas = 2,
            gatewayImage = "porygom/parsergateway:develop",
            //parserImage = "porygom/example_parser:develop"
-           parserImage = repoImageName
+           parserImage = repoImageName,
+           cpuPerInstance = 1000,
+           mbMemPerInstance = 300
          } )( success )
 
       if( success ) {
@@ -130,5 +141,14 @@ main
      }else{
        throw( UnknownType, doc.type + " is not supported" )
      }
+  }
+
+  [ destroy( info ) ] {
+    info.owner.regex = "[^a-z0-9.]"
+    info.owner.replacement = "-"
+    replaceAll@StringUtils( info.owner )( ownerdns )
+
+    tag = info.name + "-" + ownerdns
+    deleteDeployAndService@ParserDeploy( tag )( result )
   }
 }

@@ -6,6 +6,7 @@ import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.AppsV1Api;
 import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.custom.IntOrString;
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
@@ -25,10 +26,13 @@ public class ParserDeploy extends JavaService {
     public static void main(String[] args) throws IOException, FaultException, InterruptedException {
         Value v = Value.create();
         v.getFirstChild( "name" ).setValue( "kage" );
+        v.getFirstChild( "owner" ).setValue( "cake_company" );
         v.getFirstChild( "gateWayReplicas" ).setValue(1);
         v.getFirstChild( "parserReplicas" ).setValue(1);
         v.getFirstChild( "gatewayImage" ).setValue( "porygom/parsergateway:develop" );
         v.getFirstChild( "parserImage" ).setValue( "porygom/example_parser:develop" );
+        v.getFirstChild( "cpuPerInstance" ).setValue( 1000 );
+        v.getFirstChild( "mbMemPerInstance" ).setValue( 200 );
 
         ParserDeploy parserDeploy = new ParserDeploy();
         parserDeploy.deleteDeployAndService( "kage" );
@@ -52,6 +56,9 @@ public class ParserDeploy extends JavaService {
         int parserReplicas = req.getFirstChild( "parserReplicas" ).intValue();
         String gatewayImage = req.getFirstChild( "gatewayImage" ).strValue();
         String parserImage = req.getFirstChild( "parserImage" ).strValue();
+        String owner = req.getFirstChild( "owner" ).strValue();
+        int cpuPerInstance = req.getFirstChild( "cpuPerInstance" ).intValue();
+        int mbMemPerInstance = req.getFirstChild( "mbMemPerInstance" ).intValue();
 
 /////////////////// gatewayService ////////////////////////////
         V1Service gatewayService =
@@ -84,13 +91,21 @@ public class ParserDeploy extends JavaService {
         gatewayEnvironment.add(
                 new V1EnvVarBuilder()
                         .withName( "LOGSTORE_HOST" )
-                        .withValue( "log-store-service:8080" )
+                        //.withValue( "log-store-service:8080" )
+                        .withValue( System.getenv( "LOGSTORE_HOST" ) )
                         .build());
 
         gatewayEnvironment.add(
                 new V1EnvVarBuilder()
                         .withName( "ALARMSERVICE_HOST" )
-                        .withValue( "alarm-service:8085" )
+                        //.withValue( "alarm-service:8085" )
+                        .withValue( System.getenv( "ALARMSERVICE_HOST" ) )
+                        .build());
+
+        gatewayEnvironment.add(
+                new V1EnvVarBuilder()
+                        .withName( "OWNER" )
+                        .withValue( owner )
                         .build());
 
         V1PodTemplateSpec gatewayTemplate = new V1PodTemplateSpecBuilder()
@@ -158,6 +173,10 @@ public class ParserDeploy extends JavaService {
                                 .addNewPort()
                                 .withContainerPort( 27521 )
                                 .endPort()
+                                .withNewResources()
+                                .addToLimits( "cpu", Quantity.fromString( cpuPerInstance + "m" ))
+                                .addToLimits( "memory", Quantity.fromString( mbMemPerInstance + "Mi" ) )
+                                .endResources()
                                 .and().build()
                 ).build();
 

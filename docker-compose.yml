@@ -24,6 +24,8 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - MONGODB_HOST=mongodb://mongo_db
       - PARSER_REPO=591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers
+      - ALARMSERVICE_HOST=alarm-service:8085
+      - LOGSTORE_HOST=log-store-service:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     container_name: builder

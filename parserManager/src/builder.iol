@@ -6,7 +6,8 @@ type BuildRequest: void {
 interface BuildService {
   RequestResponse:
   OneWay:
-    build( BuildRequest )
+    build( BuildRequest ),
+    destroy( BuildRequest )
 }
 
 outputPort Builder {

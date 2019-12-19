@@ -140,6 +140,10 @@ main
       .value = in.name
     }
 
-    delete@Database( deleteReq )( out.success )
+    {
+      delete@Database( deleteReq )( out.success )
+      |
+      destroy@Builder( {.name = in.name, .owner = user.id} )
+    }
   }]
 }

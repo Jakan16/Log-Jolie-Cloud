@@ -106,6 +106,10 @@ spec:
           value: mongodb://mongo-service
         - name: PARSER_REPO
           value: 591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers
+        - name: ALARMSERVICE_HOST
+          value: alarm-service:8085
+        - name: LOGSTORE_HOST
+          value: log-store-service:8080
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: dockersock
