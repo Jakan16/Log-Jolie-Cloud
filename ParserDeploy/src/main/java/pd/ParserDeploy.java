@@ -108,6 +108,12 @@ public class ParserDeploy extends JavaService {
                         .withValue( owner )
                         .build());
 
+        gatewayEnvironment.add(
+                new V1EnvVarBuilder()
+                        .withName( "AUTHENTICATOR_HOST" )
+                        .withValue( System.getenv("AUTHENTICATOR_HOST") )
+                        .build());
+
         V1PodTemplateSpec gatewayTemplate = new V1PodTemplateSpecBuilder()
                 .withNewMetadata()
                 .addToLabels("app", name + "-gateway")

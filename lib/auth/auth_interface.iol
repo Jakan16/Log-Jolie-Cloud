@@ -3,7 +3,6 @@ type errorMsg: string | void {
 }
 
 type UserInfo: void {
-  name: string
   id: string
   agent?: string
 }

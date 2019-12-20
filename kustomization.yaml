@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: parsermanager-service
 spec:
-  type: LoadBalancer
   selector:
     app: parsermanager
   ports:
@@ -74,6 +73,8 @@ spec:
           value: mongodb://mongo-service
         - name: BUILDER_HOST
           value: builder-service:8005
+        - name: AUTHENTICATOR_HOST
+          value: a28615d52231511eabc02060fbf1cf02-515233508.eu-central-1.elb.amazonaws.com:80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -97,6 +98,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8005
+        - containerPort: 8006
         env:
         - name: AWS_ACCESS_KEY_ID
           value: access_key
@@ -110,6 +112,8 @@ spec:
           value: alarm-service:8085
         - name: LOGSTORE_HOST
           value: log-store-service:8080
+        - name: AUTHENTICATOR_HOST
+          value: a28615d52231511eabc02060fbf1cf02-515233508.eu-central-1.elb.amazonaws.com:80
         volumeMounts:
         - mountPath: /var/run/docker.sock
           name: dockersock

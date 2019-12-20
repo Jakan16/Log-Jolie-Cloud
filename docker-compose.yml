@@ -11,6 +11,7 @@ services:
     environment:
       - MONGODB_HOST=mongodb://mongo_db
       - BUILDER_HOST=builder:8005
+      - AUTHENTICATOR_HOST=mangler
     container_name: parsermanager
   builder:
     build:
@@ -26,6 +27,7 @@ services:
       - PARSER_REPO=591632264589.dkr.ecr.eu-central-1.amazonaws.com/parsers
       - ALARMSERVICE_HOST=alarm-service:8085
       - LOGSTORE_HOST=log-store-service:8080
+      - AUTHENTICATOR_HOST=mangler
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     container_name: builder
@@ -42,8 +44,7 @@ services:
       - PARSER_HOST=parser:27521
       - LOGSTORE_HOST=logstore:8080
       - ALARMSERVICE_HOST=alarmservice:8005
+      - AUTHENTICATOR_HOST=mangler
     container_name: parsergateway
   parser:
     image: porygom/example_parser:develop
-    ports:
-      - "27521:27521"
