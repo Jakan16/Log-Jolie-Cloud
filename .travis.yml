@@ -23,7 +23,6 @@ jobs:
       # tests
       script:
         - docker exec parsermanager jolie parserManager/test/submitcode_test.ol
-        - docker exec parsermanager jolie parserManager/test/auth_test.ol
         - docker exec builder jolie builder/test/build_container_test.ol
 
     - stage: push to docker hub
