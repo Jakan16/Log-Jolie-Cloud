@@ -35,10 +35,12 @@ jobs:
         - (cd java/mongo4jolie && mvn package)
         - (cd ParserDeploy && mvn package)
         - docker-compose build
+        - docker build . -f builder/test/Dockerfile -t porygom/example_parser:develop
 
       script:
         - docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
         - docker push porygom/parsermanager:develop
         - docker push porygom/builder:develop
         - docker push porygom/parsergateway:develop
+        - docker push porygom/example_parser:develop
       if: branch = master
